@@ -1,0 +1,17 @@
+# build outputs and vendor blobs
+*.fd
+*.img
+*.bin
+*.elf
+*.map
+*.log
+*.efi
+*.aml
+out/
+boot0dump.bin
+reset_stub/
+__pycache__/
+*.pyc
+*.orig
+*.bak
+*.pre_*
