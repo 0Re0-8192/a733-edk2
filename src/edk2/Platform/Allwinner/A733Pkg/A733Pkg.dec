@@ -1,0 +1,117 @@
+## @file
+#  Allwinner A733 Platform Package Declaration
+#
+#  Based on Allwinner A733 (sun50i-a733) SoC
+#  Reference: awwiniot/UEFI-aw1689 (A64), pftf/RPi4 (RPi4)
+##
+
+[Defines]
+  DEC_SPECIFICATION              = 0x00010005
+  PACKAGE_NAME                   = A733Pkg
+  PACKAGE_GUID                   = 4a733000-dead-beef-cafe-a733a733a733
+  PACKAGE_VERSION                = 0.1
+
+[Includes]
+  Include
+
+[Guids]
+  gA733TokenSpaceGuid = { 0xa733a733, 0xa733, 0xa733, { 0xa7, 0x33, 0xa7, 0x33, 0xa7, 0x33, 0xa7, 0x33 } }
+
+[Protocols]
+  # Marker and ownership contract for the opt-in physical GOP framebuffer.
+  gA733PhysicalGopProtocolGuid = { 0xa7331005, 0x480d, 0x4e15, { 0x9c, 0x63, 0xa7, 0x33, 0x10, 0x05, 0x00, 0x01 } }
+
+[PcdsFixedAtBuild]
+  # UART0 base address (Allwinner A733 UART0)
+  gA733TokenSpaceGuid.PcdSerialRegisterBase|0x02500000|UINT64|0x00000001
+
+  # GICv3 addresses (confirmed from DTB: interrupt-controller@3400000)
+  gA733TokenSpaceGuid.PcdGicDistributorBase|0x03400000|UINT64|0x00000002
+  gA733TokenSpaceGuid.PcdGicRedistributorsBase|0x03460000|UINT64|0x00000003
+
+  # Diagnostic gate for the synthetic 4 KiB low-page system-memory HOB used to
+  # satisfy bootmgfw's fixed AllocateAddress request at 0x00102000.
+  gA733TokenSpaceGuid.PcdExposeBootMgrLowPageHob|TRUE|BOOLEAN|0x00000004
+
+  # SMHC transfer clock divider programmed into CLKCR after reset.
+  # With the current 100 MHz module clock:
+  #   0 -> 50 MHz
+  #   1 -> 25 MHz
+  gA733TokenSpaceGuid.PcdSmhcTransferClockDiv|1|UINT32|0x00000005
+
+  # Diagnostic gate for multi-block SD reads.
+  # TRUE  -> split CMD18 reads into per-block CMD17 transactions
+  # FALSE -> keep native CMD18 multi-block DMA path
+  gA733TokenSpaceGuid.PcdSmhcSplitCmd18Reads|TRUE|BOOLEAN|0x00000006
+
+  # Optional extra DRAM carveouts to reserve at PEI time for targeted
+  # handoff/debug experiments without source edits.
+  gA733TokenSpaceGuid.PcdExtraCarveout0Base|0x0|UINT64|0x00000007
+  gA733TokenSpaceGuid.PcdExtraCarveout0Size|0x0|UINT64|0x00000008
+  gA733TokenSpaceGuid.PcdExtraCarveout1Base|0x0|UINT64|0x00000009
+  gA733TokenSpaceGuid.PcdExtraCarveout1Size|0x0|UINT64|0x0000000A
+
+  # Optional extra DXE-time reserve-only ranges for experiments that should
+  # not perturb the PHIT-contiguous PEI free-memory assumptions.
+  gA733TokenSpaceGuid.PcdExtraDxeReserve0Base|0x0|UINT64|0x0000000B
+  gA733TokenSpaceGuid.PcdExtraDxeReserve0Size|0x0|UINT64|0x0000000C
+  gA733TokenSpaceGuid.PcdExtraDxeReserve1Base|0x0|UINT64|0x0000000D
+  gA733TokenSpaceGuid.PcdExtraDxeReserve1Size|0x0|UINT64|0x0000000E
+
+  # Diagnostic gate for the A733 IOMMU identity probe. When enabled, the DXE
+  # probe temporarily enables the IOMMU CCU gates/resets, reads raw IOMMU
+  # registers, logs before/after/restored CCU values, then restores the
+  # original CCU state. Keep disabled for normal builds.
+  gA733TokenSpaceGuid.PcdIommuProbeDxeEnable|FALSE|BOOLEAN|0x0000000F
+
+  # Diagnostic gate for the A733 display pipeline state probe. When enabled,
+  # the DXE probe reads CCU/PCK/RTC-CCU state for DE/TCON/HDMI bring-up.
+  gA733TokenSpaceGuid.PcdDisplayProbeDxeEnable|FALSE|BOOLEAN|0x00000010
+
+  # Extra guard for direct display block MMIO reads. Keep FALSE until the CCU
+  # and power-domain state shows the display island is safe to read.
+  gA733TokenSpaceGuid.PcdDisplayProbeTouchDisplayMmio|FALSE|BOOLEAN|0x00000011
+
+  # Diagnostic-only helper for PcdDisplayProbeTouchDisplayMmio. When TRUE, the
+  # display probe temporarily opens the relevant CCU gates/resets, logs
+  # before/after/restored values, reads DE/TCON/HDMI MMIO, then restores the
+  # original CCU values before returning.
+  gA733TokenSpaceGuid.PcdDisplayProbeTemporaryClockTouch|FALSE|BOOLEAN|0x00000012
+
+  # Diagnostic gate for EFI_MEMORY_ATTRIBUTE_PROTOCOL exposure. Keep FALSE
+  # while isolating Windows EBS/runtime handoff; TRUE leaves the protocol
+  # installed for A/B comparison.
+  gA733TokenSpaceGuid.PcdMemoryAttributeProtocolEnabledDefault|FALSE|BOOLEAN|0x00000013
+
+  # Fixed-mode physical HDMI link diagnostic. This does not install a GOP and
+  # leaves HeadlessGop as the fallback. When enabled it makes audited volatile
+  # PCK600/CCU/TCON3/HDMI/PHY changes and outputs a 720p magenta test frame.
+  # Keep FALSE except for an owned-device link-validation build.
+  gA733TokenSpaceGuid.PcdA733HdmiTestPatternEnable|FALSE|BOOLEAN|0x00000014
+
+  # Promote the RAM-backed GOP to a 1280x720 reserved, write-combined
+  # framebuffer and scan it out through DE0/UI0/Blender0 after the fixed HDMI
+  # link diagnostic succeeds. Keep FALSE until an owned-device scanout build.
+  gA733TokenSpaceGuid.PcdA733PhysicalGopEnable|FALSE|BOOLEAN|0x00000015
+
+  # Opt-in no-swap update path. When enabled, PlatformBootManager waits briefly
+  # for serial/console 'u' before booting Windows; if received, it validates the
+  # SD BOOT0 region, patches the known BOOT0 branch into force-DDR-FEL mode,
+  # rewrites only BOOT0, flushes, and resets. No write occurs without 'u'.
+  gA733TokenSpaceGuid.PcdA733EnterUmsPromptEnable|TRUE|BOOLEAN|0x00000016
+  gA733TokenSpaceGuid.PcdA733EnterUmsPromptTimeoutMs|2000|UINT32|0x00000017
+
+  ## H955: when FALSE, suppress high-volume HDMI link diagnostic register traces
+  #  (UART at 115200 bps made them cost ~8.6 s of boot). Stage/complete lines stay.
+  gA733TokenSpaceGuid.PcdA733HdmiVerboseTrace|TRUE|BOOLEAN|0x00000018
+
+  ## H958: A55 cluster (CPU_L) PLL N (x DCXO 26 MHz). 0 = leave the boot clock (N=39, 1014 MHz).
+  gA733TokenSpaceGuid.PcdA733CpuLN|0|UINT32|0x00000019
+  ## H958: AXP8191 DCDC2 (vdd-cpu) voltage code written before raising the clock (mV = 500 + 10 * code). 0 = unchanged.
+  gA733TokenSpaceGuid.PcdA733CpuVoltageCode|0|UINT32|0x0000001A
+
+  ## H960: UEFI SD UHS-I bring-up level. 0 = leave boot0 state, 1 = full re-init at 3.3V High Speed,
+  #  2 = CMD11 to 1.8V + SDR25 (50 MHz), 3 = SDR50 (100 MHz), 4 = SDR104 (200 MHz).
+  gA733TokenSpaceGuid.PcdSmhcUhsLevel|0|UINT32|0x0000001B
+
+  # Note: PcdSystemMemoryBase/Size and PcdFdBaseAddress are from ArmPkg.dec (gArmTokenSpaceGuid)

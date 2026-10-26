@@ -1,0 +1,46 @@
+## @file
+# A733 fixed-mode HDMI link diagnostic.
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = A733HdmiTestPatternDxe
+  FILE_GUID                      = A7331004-0000-0000-0000-A73310040001
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = A733HdmiTestPatternDxeInitialize
+
+[Sources]
+  A733HdmiTestPatternDxe.c
+
+[Packages]
+  ArmPkg/ArmPkg.dec
+  MdePkg/MdePkg.dec
+  Platform/Allwinner/A733Pkg/A733Pkg.dec
+
+[LibraryClasses]
+  ArmLib
+  BaseLib
+  DxeServicesTableLib
+  IoLib
+  MemoryAllocationLib
+  PcdLib
+  PrintLib
+  SerialPortLib
+  TimerLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+
+[FixedPcd]
+  gA733TokenSpaceGuid.PcdA733HdmiTestPatternEnable
+  gA733TokenSpaceGuid.PcdA733PhysicalGopEnable
+  gA733TokenSpaceGuid.PcdA733HdmiVerboseTrace
+  gA733TokenSpaceGuid.PcdA733CpuLN
+  gA733TokenSpaceGuid.PcdA733CpuVoltageCode
+
+[Protocols]
+  gA733PhysicalGopProtocolGuid
+  gEfiGraphicsOutputProtocolGuid
+
+[Depex]
+  gEfiGraphicsOutputProtocolGuid

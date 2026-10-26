@@ -1,0 +1,110 @@
+/** @file
+ * Multiple APIC Description Table (MADT)
+ * Allwinner A733 - GICv3
+ *
+ * GIC addresses confirmed from DTB:
+ *   interrupt-controller@3400000
+ *   reg = <0x00 0x3400000 0x00 0x10000    <- GICD
+ *          0x00 0x3460000 0x00 0xff004>   <- GICR
+ * MADT advertises the GICR discovery range rounded up to the surrounding
+ * 4 KiB MMIO boundary for Windows ACPI consumption.
+ *
+ * CPU topology (from DTB):
+ *   cpu@0   Cortex-A55  MPIDR 0x0000
+ *   cpu@100 Cortex-A55  MPIDR 0x0100
+ *   cpu@200 Cortex-A55  MPIDR 0x0200
+ *   cpu@300 Cortex-A55  MPIDR 0x0300
+ *   cpu@400 Cortex-A55  MPIDR 0x0400
+ *   cpu@500 Cortex-A55  MPIDR 0x0500
+ *   cpu@600 Cortex-A76  MPIDR 0x0600
+ *   cpu@700 Cortex-A76  MPIDR 0x0700
+ *
+ * NOTE: GICR stride is 0x20000 per CPU (GICv3 standard)
+ **/
+
+#include "AcpiTables.h"
+
+#define GICD_BASE       0x03400000
+#define GICR_BASE       0x03460000
+#define GICR_STRIDE     0x00020000
+// Full eight-core topology: CPU0-5 are Cortex-A55, CPU6-7 Cortex-A76.
+#define GICR_RANGE_SIZE (GICR_STRIDE * 8)
+
+// GICv3 GICC structure. This platform uses the system-register CPU
+// interface, not a GICv2-compatible GICC MMIO frame. Redistributors are
+// described by the MADT GICR structure below, so the per-GICC GICR base must
+// be zero.
+#define GIC_ENTRY(cpu_num, mpidr, flags) {                              \
+  EFI_ACPI_6_3_GIC,                                                     \
+  sizeof (EFI_ACPI_6_3_GIC_STRUCTURE),                                  \
+  EFI_ACPI_RESERVED_WORD,                                               \
+  cpu_num,                                                              \
+  cpu_num,    /* AcpiProcessorUid - must match DSDT _UID */             \
+  flags,                                                                \
+  0,          /* ParkingProtocolVersion */                              \
+  0,          /* PerformanceInterruptGsiv */                            \
+  0,          /* ParkedAddress */                                       \
+  0,          /* PhysicalBaseAddress - no GICv2-compatible GICC MMIO */ \
+  0,          /* GICV */                                                \
+  0,          /* GICH */                                                \
+  0,          /* VGICMaintenanceInterrupt */                            \
+  (GICR_BASE + (cpu_num) * GICR_STRIDE), /* GICRBaseAddress */          \
+  mpidr,      /* MPIDR */                                               \
+  0,          /* ProcessorPowerEfficiencyClass */                       \
+  EFI_ACPI_RESERVED_WORD,                                               \
+}
+
+#pragma pack(1)
+typedef struct {
+  EFI_ACPI_6_3_MULTIPLE_APIC_DESCRIPTION_TABLE_HEADER Header;
+  EFI_ACPI_6_3_GIC_STRUCTURE                          GicC[8];
+  EFI_ACPI_6_3_GIC_DISTRIBUTOR_STRUCTURE              GicD;
+  EFI_ACPI_6_3_GICR_STRUCTURE                         GicR;
+} A733_MADT;
+#pragma pack()
+
+A733_MADT Madt = {
+  {
+    {
+      ACPI_HEADER (
+        EFI_ACPI_6_3_MULTIPLE_APIC_DESCRIPTION_TABLE_SIGNATURE,
+        A733_MADT,
+        EFI_ACPI_6_3_MULTIPLE_APIC_DESCRIPTION_TABLE_REVISION
+      )
+    },
+    0,  // LocalApicAddress (unused for GICv3)
+    0,  // Flags
+  },
+  // All eight cores are started via the PSCI interface declared by FADT.
+  {
+    GIC_ENTRY (0, 0x0000, EFI_ACPI_6_3_GIC_ENABLED),
+    GIC_ENTRY (1, 0x0100, EFI_ACPI_6_3_GIC_ENABLED),
+    GIC_ENTRY (2, 0x0200, EFI_ACPI_6_3_GIC_ENABLED),
+    GIC_ENTRY (3, 0x0300, EFI_ACPI_6_3_GIC_ENABLED),
+    GIC_ENTRY (4, 0x0400, EFI_ACPI_6_3_GIC_ENABLED),
+    GIC_ENTRY (5, 0x0500, EFI_ACPI_6_3_GIC_ENABLED),
+    GIC_ENTRY (6, 0x0600, EFI_ACPI_6_3_GIC_ENABLED),
+    GIC_ENTRY (7, 0x0700, EFI_ACPI_6_3_GIC_ENABLED),
+  },
+  // GICD
+  {
+    EFI_ACPI_6_3_GICD,
+    sizeof (EFI_ACPI_6_3_GIC_DISTRIBUTOR_STRUCTURE),
+    EFI_ACPI_RESERVED_WORD,
+    0,          // GicId
+    GICD_BASE,
+    0,          // SystemVectorBase
+    3,          // GicVersion = GICv3
+    { EFI_ACPI_RESERVED_BYTE, EFI_ACPI_RESERVED_BYTE, EFI_ACPI_RESERVED_BYTE }
+  },
+  // GICR
+  {
+    EFI_ACPI_6_3_GICR,
+    sizeof (EFI_ACPI_6_3_GICR_STRUCTURE),
+    EFI_ACPI_RESERVED_WORD,
+    GICR_BASE,
+    GICR_RANGE_SIZE,  // page-rounded redistributor discovery range
+  },
+};
+
+VOID* CONST ReferenceAcpiTable = &Madt;

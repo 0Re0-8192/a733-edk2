@@ -1,0 +1,39 @@
+## @file
+# A733-specific ACPI Platform DXE driver with verbose serial diagnostics.
+##
+
+[Defines]
+  INF_VERSION    = 0x00010005
+  BASE_NAME      = A733AcpiPlatformDxe
+  FILE_GUID      = a733ac02-ac02-ac02-ac02-a733a733a733
+  MODULE_TYPE    = DXE_DRIVER
+  VERSION_STRING = 1.0
+  ENTRY_POINT    = A733AcpiPlatformEntryPoint
+
+[Sources]
+  A733AcpiPlatformDxe.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+
+[LibraryClasses]
+  UefiDriverEntryPoint
+  UefiBootServicesTableLib
+  BaseLib
+  BaseMemoryLib
+  DebugLib
+  PcdLib
+  PrintLib
+  SerialPortLib
+
+[Protocols]
+  gEfiAcpiTableProtocolGuid       ## CONSUMES
+  gEfiFirmwareVolume2ProtocolGuid ## CONSUMES
+
+[Pcd]
+  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiTableStorageFile
+
+[Depex]
+  gEfiAcpiTableProtocolGuid AND
+  gEfiFirmwareVolume2ProtocolGuid

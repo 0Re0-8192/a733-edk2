@@ -1,0 +1,104 @@
+/** @file
+ * Fixed ACPI Description Table (FADT)
+ * Allwinner A733 - ARMv8 HW-reduced ACPI
+ *
+ * ARM HW-reduced ACPI: no legacy x86 hardware (FACS, PM1a/b, GPE, etc.)
+ * PSCI is advertised to Windows. The SD image builder patches the bundled
+ * BL31 to make PSCI_VERSION return reliably on this board.
+ **/
+
+#include "AcpiTables.h"
+
+EFI_ACPI_6_3_FIXED_ACPI_DESCRIPTION_TABLE  Fadt = {
+  {
+    ACPI_HEADER (
+      EFI_ACPI_6_3_FIXED_ACPI_DESCRIPTION_TABLE_SIGNATURE,
+      EFI_ACPI_6_3_FIXED_ACPI_DESCRIPTION_TABLE,
+      EFI_ACPI_6_3_FIXED_ACPI_DESCRIPTION_TABLE_REVISION
+    )
+  },
+
+  // Legacy x86 FACS pointer - not used in HW_REDUCED_ACPI
+  0,                          // FirmwareCtrl
+  // Legacy DSDT 32-bit pointer - patched at runtime by AcpiTableDxe
+  0,                          // Dsdt
+
+  0,                          // Reserved0 (was INT_MODEL in ACPI 1.0)
+
+  // Preferred power profile: Tablet (0x08) - matches a portable cyberdeck
+  EFI_ACPI_6_3_PM_PROFILE_TABLET,
+
+  // Legacy x86 fields - all zero for ARM HW_REDUCED
+  0,                          // SciInt
+  0,                          // SmiCmd
+  0,                          // AcpiEnable
+  0,                          // AcpiDisable
+  0,                          // S4BiosReq
+  0,                          // PstateCnt
+  0,                          // Pm1aEvtBlk
+  0,                          // Pm1bEvtBlk
+  0,                          // Pm1aCntBlk
+  0,                          // Pm1bCntBlk
+  0,                          // Pm2CntBlk
+  0,                          // PmTmrBlk
+  0,                          // Gpe0Blk
+  0,                          // Gpe1Blk
+  0,                          // Pm1EvtLen
+  0,                          // Pm1CntLen
+  0,                          // Pm2CntLen
+  0,                          // PmTmrLen
+  0,                          // Gpe0BlkLen
+  0,                          // Gpe1BlkLen
+  0,                          // Gpe1Base
+  0,                          // CstCnt
+  0,                          // PLvl2Lat
+  0,                          // PLvl3Lat
+  0,                          // FlushSize
+  0,                          // FlushStride
+  0,                          // DutyOffset
+  0,                          // DutyWidth
+  0,                          // DayAlrm
+  0,                          // MonAlrm
+  0,                          // Century
+  0,                          // IaPcBootArch (0 for ARM)
+  0,                          // Reserved1
+
+  // FADT Flags:
+  //   HW_REDUCED_ACPI: no legacy hardware (mandatory for ARM without x86 PM)
+  //   LOW_POWER_S0_IDLE_CAPABLE intentionally not advertised during bring-up;
+  //   the platform does not yet expose validated modern standby plumbing.
+  EFI_ACPI_6_3_HW_REDUCED_ACPI,
+
+  // ResetReg: no MMIO reset register currently exposed
+  { EFI_ACPI_6_3_SYSTEM_MEMORY, 0, 0, EFI_ACPI_6_3_UNDEFINED, 0 },
+  0,                          // ResetValue
+
+  // ArmBootArch:
+  //   Bit 0: PSCI compliant.
+  //   Bit 1 clear: PSCI calls use SMC, not HVC.
+  EFI_ACPI_6_3_ARM_PSCI_COMPLIANT,
+
+  // FADT minor version (ACPI 6.3)
+  EFI_ACPI_6_3_FIXED_ACPI_DESCRIPTION_TABLE_MINOR_REVISION,
+
+  // Extended 64-bit FACS pointer - not used in HW_REDUCED_ACPI
+  0,                          // XFirmwareCtrl
+  // Extended 64-bit DSDT pointer - patched at runtime by AcpiTableDxe
+  0,                          // XDsdt
+
+  // Extended PM register blocks - all zero for ARM HW_REDUCED
+  { EFI_ACPI_6_3_SYSTEM_MEMORY, 0, 0, EFI_ACPI_6_3_UNDEFINED, 0 }, // XPm1aEvtBlk
+  { EFI_ACPI_6_3_SYSTEM_MEMORY, 0, 0, EFI_ACPI_6_3_UNDEFINED, 0 }, // XPm1bEvtBlk
+  { EFI_ACPI_6_3_SYSTEM_MEMORY, 0, 0, EFI_ACPI_6_3_UNDEFINED, 0 }, // XPm1aCntBlk
+  { EFI_ACPI_6_3_SYSTEM_MEMORY, 0, 0, EFI_ACPI_6_3_UNDEFINED, 0 }, // XPm1bCntBlk
+  { EFI_ACPI_6_3_SYSTEM_MEMORY, 0, 0, EFI_ACPI_6_3_UNDEFINED, 0 }, // XPm2CntBlk
+  { EFI_ACPI_6_3_SYSTEM_MEMORY, 0, 0, EFI_ACPI_6_3_UNDEFINED, 0 }, // XPmTmrBlk
+  { EFI_ACPI_6_3_SYSTEM_MEMORY, 0, 0, EFI_ACPI_6_3_UNDEFINED, 0 }, // XGpe0Blk
+  { EFI_ACPI_6_3_SYSTEM_MEMORY, 0, 0, EFI_ACPI_6_3_UNDEFINED, 0 }, // XGpe1Blk
+  { EFI_ACPI_6_3_SYSTEM_MEMORY, 0, 0, EFI_ACPI_6_3_UNDEFINED, 0 }, // SleepControlReg
+  { EFI_ACPI_6_3_SYSTEM_MEMORY, 0, 0, EFI_ACPI_6_3_UNDEFINED, 0 }, // SleepStatusReg
+
+  0,                          // HypervisorVendorIdentity
+};
+
+VOID *CONST  ReferenceAcpiTable = &Fadt;

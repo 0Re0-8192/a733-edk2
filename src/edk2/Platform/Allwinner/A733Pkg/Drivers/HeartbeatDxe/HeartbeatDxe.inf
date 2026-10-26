@@ -1,0 +1,31 @@
+## @file
+# Periodic heartbeat timer used to determine whether Boot Services callbacks
+# continue to run while Windows Boot Manager appears stalled.
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = HeartbeatDxe
+  FILE_GUID                      = A7331001-0000-0000-0000-A73310010001
+  MODULE_TYPE                    = UEFI_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = HeartbeatDxeEntryPoint
+
+[Sources]
+  HeartbeatDxe.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+
+[LibraryClasses]
+  UefiDriverEntryPoint
+  UefiBootServicesTableLib
+  DebugLib
+  PrintLib
+  SerialPortLib
+
+[Guids]
+  gEfiEndOfDxeEventGroupGuid
+  gEfiEventReadyToBootGuid
+  gEfiEventExitBootServicesGuid
+  gEfiEventVirtualAddressChangeGuid

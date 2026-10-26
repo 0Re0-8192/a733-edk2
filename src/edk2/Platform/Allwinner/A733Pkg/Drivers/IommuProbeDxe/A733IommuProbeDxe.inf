@@ -1,0 +1,39 @@
+## @file
+# A733 IOMMU identity probe.
+#
+# Diagnostic-only DXE driver. Default-disabled by PCD.
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = A733IommuProbeDxe
+  FILE_GUID                      = A7331002-0000-0000-0000-A73310020001
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = A733IommuProbeDxeInitialize
+
+[Sources]
+  A733IommuProbeDxe.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  Platform/Allwinner/A733Pkg/A733Pkg.dec
+
+[LibraryClasses]
+  DebugLib
+  IoLib
+  PcdLib
+  TimerLib
+  UefiDriverEntryPoint
+
+[Guids]
+  gEfiAcpi10TableGuid
+  gEfiAcpi20TableGuid
+  gEfiEventExitBootServicesGuid
+  gEfiEventReadyToBootGuid
+
+[FixedPcd]
+  gA733TokenSpaceGuid.PcdIommuProbeDxeEnable
+
+[Depex]
+  TRUE

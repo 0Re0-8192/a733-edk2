@@ -1,0 +1,30 @@
+## @file
+# A733 serial RX diagnostic probe.
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = A733SerialRxProbeDxe
+  FILE_GUID                      = A7331006-0000-0000-0000-A73310060001
+  MODULE_TYPE                    = UEFI_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = A733SerialRxProbeDxeInitialize
+
+[Sources]
+  A733SerialRxProbeDxe.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+
+[LibraryClasses]
+  DebugLib
+  SerialPortLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+
+[Guids]
+  gEfiEventReadyToBootGuid
+  gEfiEventExitBootServicesGuid
+
+[Depex]
+  TRUE

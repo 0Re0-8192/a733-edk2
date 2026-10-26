@@ -1,0 +1,60 @@
+/** @file
+ * Generic Timer Description Table (GTDT)
+ * Allwinner A733 - ARMv8 Generic Timer
+ *
+ * Timer IRQs confirmed from DTB:
+ *   interrupts = <0x01 0x0d 0xf08  <- PPI 13 -> IRQ 29 (Secure Physical)
+ *                 0x01 0x0e 0xf08  <- PPI 14 -> IRQ 30 (Non-Secure Physical)
+ *                 0x01 0x0b 0xf08  <- PPI 11 -> IRQ 27 (Virtual)
+ *                 0x01 0x0a 0xf08  <- PPI 10 -> IRQ 26 (Hypervisor)
+ **/
+
+#include "AcpiTables.h"
+
+#define GTDT_TIMER_EDGE_TRIGGERED   EFI_ACPI_6_3_GTDT_TIMER_FLAG_TIMER_INTERRUPT_MODE
+#define GTDT_TIMER_ACTIVE_LOW       EFI_ACPI_6_3_GTDT_TIMER_FLAG_TIMER_INTERRUPT_POLARITY
+#define GTDT_TIMER_ALWAYS_ON        EFI_ACPI_6_3_GTDT_TIMER_FLAG_ALWAYS_ON_CAPABILITY
+
+// Standard ARM timer flags
+#define GTDT_SECURE_TIMER_FLAGS     GTDT_TIMER_ACTIVE_LOW
+#define GTDT_NONSECURE_TIMER_FLAGS  (GTDT_TIMER_ACTIVE_LOW | GTDT_TIMER_ALWAYS_ON)
+#define GTDT_VIRTUAL_TIMER_FLAGS    GTDT_TIMER_ACTIVE_LOW
+#define GTDT_EL2_TIMER_FLAGS        GTDT_TIMER_ACTIVE_LOW
+
+EFI_ACPI_6_3_GENERIC_TIMER_DESCRIPTION_TABLE Gtdt = {
+  {
+    ACPI_HEADER (
+      EFI_ACPI_6_3_GENERIC_TIMER_DESCRIPTION_TABLE_SIGNATURE,
+      EFI_ACPI_6_3_GENERIC_TIMER_DESCRIPTION_TABLE,
+      EFI_ACPI_6_3_GENERIC_TIMER_DESCRIPTION_TABLE_REVISION
+    )
+  },
+  // CntControlBase - system counter not memory-mapped accessible
+  0xFFFFFFFFFFFFFFFF,
+  // Reserved
+  EFI_ACPI_RESERVED_DWORD,
+  // SecurePL1TimerGSIV (IRQ 29, PPI 13)
+  29,
+  // SecurePL1TimerFlags
+  GTDT_SECURE_TIMER_FLAGS,
+  // NonSecurePL1TimerGSIV (IRQ 30, PPI 14)
+  30,
+  // NonSecurePL1TimerFlags
+  GTDT_NONSECURE_TIMER_FLAGS,
+  // VirtualTimerGSIV (IRQ 27, PPI 11)
+  27,
+  // VirtualTimerFlags
+  GTDT_VIRTUAL_TIMER_FLAGS,
+  // NonSecurePL2TimerGSIV (IRQ 26, PPI 10)
+  26,
+  // NonSecurePL2TimerFlags
+  GTDT_EL2_TIMER_FLAGS,
+  // CntReadBase - not implemented
+  0xFFFFFFFFFFFFFFFF,
+  // PlatformTimerCount
+  0,
+  // PlatformTimerOffset
+  0,
+};
+
+VOID* CONST ReferenceAcpiTable = &Gtdt;

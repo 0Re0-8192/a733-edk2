@@ -1,0 +1,26 @@
+## @file
+# A733 PCI host bridge library for the generic PciHostBridgeDxe driver.
+#
+# This describes the single root complex using the PCIe windows published by
+# the Orange Pi A733 vendor DT.
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = A733PciHostBridgeLib
+  FILE_GUID                      = 7c8c0d9d-8b57-4ef4-98e8-0f4f6d46d001
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = PciHostBridgeLib
+
+[Sources]
+  A733PciHostBridgeLib.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  OvmfPkg/OvmfPkg.dec
+
+[LibraryClasses]
+  DebugLib
+  PciHostBridgeUtilityLib

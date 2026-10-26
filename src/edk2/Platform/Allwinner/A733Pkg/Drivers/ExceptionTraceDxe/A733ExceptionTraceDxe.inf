@@ -1,0 +1,33 @@
+## @file
+# A733 exception trace hook.
+#
+# Diagnostic-only runtime driver. Registers AArch64 exception callbacks through
+# EFI_CPU_ARCH_PROTOCOL and logs ESR/ELR/FAR/SPSR if Windows faults before KD.
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = A733ExceptionTraceDxe
+  FILE_GUID                      = A733B007-0000-0000-0000-A733B0071008
+  MODULE_TYPE                    = DXE_RUNTIME_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = A733ExceptionTraceDxeInitialize
+
+[Sources]
+  A733ExceptionTraceDxe.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+
+[LibraryClasses]
+  DebugLib
+  PrintLib
+  SerialPortLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+
+[Protocols]
+  gEfiCpuArchProtocolGuid
+
+[Depex]
+  gEfiCpuArchProtocolGuid

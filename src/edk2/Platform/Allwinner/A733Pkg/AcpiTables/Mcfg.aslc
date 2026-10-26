@@ -1,0 +1,45 @@
+/** @file
+ * PCI Express Memory Mapped Configuration Space Base Address Description Table
+ * for the A733 PCIe root complex.
+ *
+ * The Orange Pi A733 BSP describes a 16 MiB PCIe config aperture at
+ * 0x20000000 and programs outbound iATU for non-root config accesses. This is
+ * not yet proof of a fully standard ECAM implementation, but it is the only
+ * BSP-backed aperture available for MCFG while tracing bootmgr.
+ **/
+
+#include <IndustryStandard/Acpi.h>
+#include <IndustryStandard/MemoryMappedConfigurationSpaceAccessTable.h>
+#include <Library/PcdLib.h>
+#include "AcpiTables.h"
+
+#define A733_PCIE_ECAM_BASE  FixedPcdGet64 (PcdPciExpressBaseAddress)
+
+#pragma pack(push, 1)
+
+typedef struct {
+  EFI_ACPI_MEMORY_MAPPED_CONFIGURATION_BASE_ADDRESS_TABLE_HEADER               Header;
+  EFI_ACPI_MEMORY_MAPPED_ENHANCED_CONFIGURATION_SPACE_BASE_ADDRESS_ALLOCATION_STRUCTURE Entry;
+} A733_MCFG_TABLE;
+
+A733_MCFG_TABLE Mcfg = {
+  {
+    ACPI_HEADER (
+      EFI_ACPI_6_3_PCI_EXPRESS_MEMORY_MAPPED_CONFIGURATION_SPACE_BASE_ADDRESS_DESCRIPTION_TABLE_SIGNATURE,
+      A733_MCFG_TABLE,
+      EFI_ACPI_MEMORY_MAPPED_CONFIGURATION_SPACE_ACCESS_TABLE_REVISION
+      ),
+    0
+  },
+  {
+    A733_PCIE_ECAM_BASE,
+    0,      // Segment Group
+    0,      // Start Bus
+    0x0F,   // End Bus (16 MiB config aperture -> buses 0..15)
+    0
+  }
+};
+
+#pragma pack(pop)
+
+VOID *CONST ReferenceAcpiTable = &Mcfg;

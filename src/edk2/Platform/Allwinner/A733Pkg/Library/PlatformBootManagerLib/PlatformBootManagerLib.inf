@@ -1,0 +1,55 @@
+## @file
+#  Minimal PlatformBootManagerLib for A733 - boots directly to UEFI Shell.
+#
+#  Copyright (c) 2026, a733-edk2 project. All rights reserved.
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+##
+
+[Defines]
+  INF_VERSION    = 0x00010005
+  BASE_NAME      = PlatformBootManagerLib
+  FILE_GUID      = A733B001-0000-0000-0000-A733B0010001
+  MODULE_TYPE    = DXE_DRIVER
+  VERSION_STRING = 1.0
+  LIBRARY_CLASS  = PlatformBootManagerLib|DXE_DRIVER
+
+[Sources]
+  PlatformBootManagerLib.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  Platform/Allwinner/A733Pkg/A733Pkg.dec
+
+[LibraryClasses]
+  BaseLib
+  BaseMemoryLib
+  DebugLib
+  DevicePathLib
+  MemoryAllocationLib
+  PcdLib
+  SerialPortLib
+  UefiBootManagerLib
+  UefiBootServicesTableLib
+  UefiLib
+  UefiRuntimeServicesTableLib
+
+[Protocols]
+  gA733PhysicalGopProtocolGuid
+  gEfiBlockIoProtocolGuid
+  gEfiDevicePathProtocolGuid
+  gEfiFirmwareVolume2ProtocolGuid
+  gEfiGraphicsOutputProtocolGuid
+  gEfiSimpleFileSystemProtocolGuid
+
+[Guids]
+  gEdkiiSerialPortLibVendorGuid
+  gEfiVT100Guid
+
+[FixedPcd]
+  gEfiMdePkgTokenSpaceGuid.PcdUartDefaultBaudRate
+  gEfiMdePkgTokenSpaceGuid.PcdUartDefaultDataBits
+  gEfiMdePkgTokenSpaceGuid.PcdUartDefaultParity
+  gEfiMdePkgTokenSpaceGuid.PcdUartDefaultStopBits
+  gA733TokenSpaceGuid.PcdA733EnterUmsPromptEnable
+  gA733TokenSpaceGuid.PcdA733EnterUmsPromptTimeoutMs

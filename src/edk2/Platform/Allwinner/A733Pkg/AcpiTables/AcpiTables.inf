@@ -1,0 +1,32 @@
+## @file
+# Allwinner A733 ACPI Tables
+##
+
+[Defines]
+  INF_VERSION    = 0x00010005
+  BASE_NAME      = A733AcpiTables
+  FILE_GUID      = a733ac01-ac01-ac01-ac01-a733a733a733
+  MODULE_TYPE    = USER_DEFINED
+  VERSION_STRING = 0.1
+
+[Sources]
+  Dbg2.aslc
+  Fadt.aslc
+  Madt.aslc
+  Gtdt.aslc
+  # Bring-up A/B: omit IORT entirely to test whether early Windows HAL
+  # IO-remapping/DMA topology parsing is the post-EBS stop.
+  # Keep COM0 disabled for normal PnP enumeration in DSDT, but publish the
+  # dedicated serial console/debug tables needed for Windows kernel debug.
+  Spcr.aslc
+  Dsdt.asl
+
+[Packages]
+  ArmPkg/ArmPkg.dec
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  DynamicTablesPkg/DynamicTablesPkg.dec
+  Platform/Allwinner/A733Pkg/A733Pkg.dec
+
+[FixedPcd]
+  gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress

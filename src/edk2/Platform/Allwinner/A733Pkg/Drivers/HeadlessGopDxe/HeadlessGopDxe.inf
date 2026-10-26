@@ -1,0 +1,44 @@
+[Defines]
+  INF_VERSION                    = 0x0001001A
+  BASE_NAME                      = HeadlessGopDxe
+  FILE_GUID                      = 7f7a64da-cb91-4f2d-9d7a-6f0eb6bb2d60
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = HeadlessGopEntryPoint
+
+[Sources]
+  HeadlessGopDxe.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  Platform/Allwinner/A733Pkg/A733Pkg.dec
+
+[LibraryClasses]
+  BaseLib
+  BaseMemoryLib
+  CacheMaintenanceLib
+  DebugLib
+  DevicePathLib
+  DxeServicesTableLib
+  MemoryAllocationLib
+  PcdLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+  UefiLib
+
+[Protocols]
+  gA733PhysicalGopProtocolGuid
+  gEfiCpuArchProtocolGuid
+  gEfiDevicePathProtocolGuid
+  gEfiGraphicsOutputProtocolGuid
+
+[Guids]
+  gEfiEventReadyToBootGuid
+  gEfiEventExitBootServicesGuid
+
+[FixedPcd]
+  gA733TokenSpaceGuid.PcdA733HdmiTestPatternEnable
+  gA733TokenSpaceGuid.PcdA733PhysicalGopEnable
+
+[Depex]
+  gEfiCpuArchProtocolGuid

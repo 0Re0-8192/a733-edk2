@@ -1,0 +1,35 @@
+## @file
+# Security stub for A733 that permits external EFI images before EndOfDxe.
+#
+# This keeps the Security/Security2 architectural protocols available for DXE
+# image loading, but intentionally skips the default 3rd-party defer policy in
+# MdeModulePkg/SecurityStubDxe so fs0:\EFI\BOOT\BOOTAA64.EFI can be tested.
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = A733SecurityStubDxe
+  FILE_GUID                      = A733B007-0000-0000-0000-A733B0071001
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = SecurityStubInitialize
+
+[Sources]
+  A733SecurityStub.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+
+[LibraryClasses]
+  UefiDriverEntryPoint
+  UefiBootServicesTableLib
+  DebugLib
+  SecurityManagementLib
+
+[Protocols]
+  gEfiSecurityArchProtocolGuid                  ## PRODUCES
+  gEfiSecurity2ArchProtocolGuid                 ## PRODUCES
+
+[Depex]
+  TRUE

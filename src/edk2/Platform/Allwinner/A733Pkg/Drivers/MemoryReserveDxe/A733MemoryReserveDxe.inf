@@ -1,0 +1,45 @@
+## @file
+# A733 firmware carveout reservation probe.
+#
+# Logs the EFI memory descriptors covering a few firmware-owned ranges and
+# attempts to reserve them so they are no longer handed to the OS as generic
+# memory.
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = A733MemoryReserveDxe
+  FILE_GUID                      = A733B007-0000-0000-0000-A733B0071004
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = A733MemoryReserveDxeInitialize
+
+[Sources]
+  A733MemoryReserveDxe.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  ArmPkg/ArmPkg.dec
+  ArmPlatformPkg/ArmPlatformPkg.dec
+  Platform/Allwinner/A733Pkg/A733Pkg.dec
+
+[LibraryClasses]
+  DebugLib
+  MemoryAllocationLib
+  PcdLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+
+[FixedPcd]
+  gA733TokenSpaceGuid.PcdExtraDxeReserve0Base
+  gA733TokenSpaceGuid.PcdExtraDxeReserve0Size
+  gA733TokenSpaceGuid.PcdExtraDxeReserve1Base
+  gA733TokenSpaceGuid.PcdExtraDxeReserve1Size
+  gArmTokenSpaceGuid.PcdFdBaseAddress
+  gArmTokenSpaceGuid.PcdFdSize
+  gArmPlatformTokenSpaceGuid.PcdCPUCoresStackBase
+  gArmPlatformTokenSpaceGuid.PcdCPUCorePrimaryStackSize
+  gArmPlatformTokenSpaceGuid.PcdCoreCount
+
+[Depex]
+  TRUE

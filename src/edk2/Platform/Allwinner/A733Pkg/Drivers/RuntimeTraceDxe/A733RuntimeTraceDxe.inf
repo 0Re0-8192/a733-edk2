@@ -1,0 +1,39 @@
+## @file
+# A733 runtime handoff trace hook.
+#
+# Diagnostic-only runtime driver. Hooks runtime services long enough to log
+# whether Windows reaches the runtime handoff, then restores and forwards to the
+# original RuntimeDxe implementation before SetVirtualAddressMap.
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = A733RuntimeTraceDxe
+  FILE_GUID                      = A733B007-0000-0000-0000-A733B0071005
+  MODULE_TYPE                    = DXE_RUNTIME_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = A733RuntimeTraceDxeInitialize
+
+[Sources]
+  A733RuntimeTraceDxe.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+
+[LibraryClasses]
+  BaseMemoryLib
+  DebugLib
+  PrintLib
+  SerialPortLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+  UefiRuntimeServicesTableLib
+
+[Protocols]
+  gEfiRuntimeArchProtocolGuid
+
+[Guids]
+  gEfiEventExitBootServicesGuid
+
+[Depex]
+  gEfiRuntimeArchProtocolGuid

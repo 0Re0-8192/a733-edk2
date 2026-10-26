@@ -1,0 +1,203 @@
+## @file
+# Allwinner A733 Flash Description File
+#
+# FD layout:
+#   0x4A000000 + 0x00000: ARM64 jump stub (4KB) - TF-A lands here
+#   0x4A000000 + 0x01000: FVMAIN_COMPACT (PeilessSec + LZMA-compressed FVMAIN)
+#   Total size: 1MB
+#
+# Boot flow:
+#   TF-A jumps to 0x4A000000 → stub B-instruction → PeilessSec entry
+#   PeilessSec: MMU init → DecompressFirstFv (LZMA) → LoadDxeCoreFromFv
+##
+
+[FD.A733]
+BaseAddress   = 0x4A000000
+Size          = 0x00128000  # 1160KB (fits in sunxi-package u-boot slot 0x12B9DC)
+ErasePolarity = 1
+BlockSize     = 0x00001000  # 4KB
+NumBlocks     = 0x128
+
+# Jump stub at offset 0: ARM64 branch to PeilessSec entry point.
+# NOTE: make_sd_image.py auto-patches this from FV ZeroVector B instruction.
+0x00000000|0x00001000
+DATA = {
+  0x20, 0x1D, 0x00, 0x14   # placeholder - patched by make_sd_image.py
+}
+
+# FVMAIN_COMPACT: PeilessSec (SEC) + LZMA-compressed FVMAIN
+0x00001000|0x00127000
+gArmTokenSpaceGuid.PcdFvBaseAddress|gArmTokenSpaceGuid.PcdFvSize
+FV = FVMAIN_COMPACT
+
+
+[FV.FVMAIN_COMPACT]
+FvAlignment        = 8
+ERASE_POLARITY     = 1
+MEMORY_MAPPED      = TRUE
+STICKY_WRITE       = TRUE
+LOCK_CAP           = TRUE
+LOCK_STATUS        = TRUE
+WRITE_DISABLED_CAP = TRUE
+WRITE_ENABLED_CAP  = TRUE
+WRITE_STATUS       = TRUE
+WRITE_LOCK_CAP     = TRUE
+WRITE_LOCK_STATUS  = TRUE
+READ_DISABLED_CAP  = TRUE
+READ_ENABLED_CAP   = TRUE
+READ_STATUS        = TRUE
+READ_LOCK_CAP      = TRUE
+READ_LOCK_STATUS   = TRUE
+
+  # SEC/PrePi - MUST be first in FV so ZeroVector B points here
+  INF ArmPlatformPkg/PeilessSec/PeilessSec.inf
+
+  # LZMA-compressed sub-FV containing all DXE drivers.
+  # DecompressFirstFv() searches for EFI_FV_FILETYPE_FIRMWARE_VOLUME_IMAGE,
+  # decompresses it using the LZMA handler registered by LzmaCustomDecompressLib,
+  # then LoadDxeCoreFromFv() finds DxeCore inside.
+  FILE FV_IMAGE = 9E21FD93-9C72-4c15-8C4B-E77F1DB2D792 {
+    SECTION GUIDED EE4E5898-3914-4259-9D6E-DC7BD79403CF {
+      SECTION FV_IMAGE = FVMAIN
+    }
+  }
+
+
+[FV.FVMAIN]
+FvAlignment        = 8
+ERASE_POLARITY     = 1
+MEMORY_MAPPED      = TRUE
+STICKY_WRITE       = TRUE
+LOCK_CAP           = TRUE
+LOCK_STATUS        = TRUE
+WRITE_DISABLED_CAP = TRUE
+WRITE_ENABLED_CAP  = TRUE
+WRITE_STATUS       = TRUE
+WRITE_LOCK_CAP     = TRUE
+WRITE_LOCK_STATUS  = TRUE
+READ_DISABLED_CAP  = TRUE
+READ_ENABLED_CAP   = TRUE
+READ_STATUS        = TRUE
+READ_LOCK_CAP      = TRUE
+READ_LOCK_STATUS   = TRUE
+
+  # PCD DXE driver - must be first, all DXE drivers depend on gEfiPcdProtocolGuid
+  INF MdeModulePkg/Universal/PCD/Dxe/Pcd.inf
+
+  # ARM core drivers
+  INF ArmPkg/Drivers/CpuDxe/CpuDxe.inf
+  INF ArmPkg/Drivers/ArmGicDxe/ArmGicDxe.inf
+  INF ArmPkg/Drivers/TimerDxe/TimerDxe.inf
+  INF ArmPkg/Drivers/ArmPciCpuIo2Dxe/ArmPciCpuIo2Dxe.inf
+
+  # PCI root bridge provider for the A733 RC windows.
+  INF MdeModulePkg/Bus/Pci/PciHostBridgeDxe/PciHostBridgeDxe.inf
+
+  # DXE core
+  INF MdeModulePkg/Core/Dxe/DxeMain.inf
+
+  # Security stub, Metronome, Watchdog, BDS Arch Protocols
+  INF Platform/Allwinner/A733Pkg/Drivers/SecurityStubDxe/A733SecurityStubDxe.inf
+  INF MdeModulePkg/Universal/Metronome/Metronome.inf
+  INF MdeModulePkg/Universal/WatchdogTimerDxe/WatchdogTimer.inf
+
+  # HII Database - required by BdsDxe (UefiHiiServicesLib DEPEX needs these protocols)
+  INF MdeModulePkg/Universal/HiiDatabaseDxe/HiiDatabaseDxe.inf
+
+  # Unicode Collation 2 - required by Shell (UefiShellCommandLib CommandInit)
+  INF MdeModulePkg/Universal/Disk/UnicodeCollation/EnglishDxe/EnglishDxe.inf
+
+  # Console drivers (required for gST->ConOut to be non-NULL when Shell runs)
+  INF MdeModulePkg/Universal/SerialDxe/SerialDxe.inf
+  INF Platform/Allwinner/A733Pkg/Drivers/HeadlessGopDxe/HeadlessGopDxe.inf
+  INF Platform/Allwinner/A733Pkg/Drivers/ExitBootServicesTraceDxe/A733ExitBootServicesTraceDxe.inf
+  INF Platform/Allwinner/A733Pkg/Drivers/MemoryAttributeManagerDxe/A733MemoryAttributeManagerDxe.inf
+  INF Platform/Allwinner/A733Pkg/Drivers/IommuProbeDxe/A733IommuProbeDxe.inf
+  INF Platform/Allwinner/A733Pkg/Drivers/DisplayProbeDxe/A733DisplayProbeDxe.inf
+  INF Platform/Allwinner/A733Pkg/Drivers/HdmiTestPatternDxe/A733HdmiTestPatternDxe.inf
+  INF MdeModulePkg/Universal/Console/ConPlatformDxe/ConPlatformDxe.inf
+  INF MdeModulePkg/Universal/Console/ConSplitterDxe/ConSplitterDxe.inf
+  INF MdeModulePkg/Universal/Console/GraphicsConsoleDxe/GraphicsConsoleDxe.inf
+  INF MdeModulePkg/Universal/Console/TerminalDxe/TerminalDxe.inf
+
+  INF MdeModulePkg/Universal/BdsDxe/BdsDxe.inf
+
+  # Runtime drivers
+  INF MdeModulePkg/Core/RuntimeDxe/RuntimeDxe.inf
+  INF MdeModulePkg/Universal/Variable/RuntimeDxe/VariableRuntimeDxe.inf
+  INF MdeModulePkg/Universal/CapsuleRuntimeDxe/CapsuleRuntimeDxe.inf
+  INF MdeModulePkg/Universal/MonotonicCounterRuntimeDxe/MonotonicCounterRuntimeDxe.inf
+  INF MdeModulePkg/Universal/ResetSystemRuntimeDxe/ResetSystemRuntimeDxe.inf
+  INF EmbeddedPkg/RealTimeClockRuntimeDxe/RealTimeClockRuntimeDxe.inf
+  INF Platform/Allwinner/A733Pkg/Drivers/MemoryReserveDxe/A733MemoryReserveDxe.inf
+
+  # ACPI
+  INF MdeModulePkg/Universal/Acpi/AcpiTableDxe/AcpiTableDxe.inf
+  INF RuleOverride=ACPITABLE Platform/Allwinner/A733Pkg/AcpiTables/AcpiTables.inf
+  INF Platform/Allwinner/A733Pkg/Drivers/AcpiPlatformDxe/A733AcpiPlatformDxe.inf
+
+  # SD: Allwinner SMHC0 host controller + SD protocol stack
+  INF Platform/Allwinner/A733Pkg/Drivers/SdMmcDxe/SunxiSmhcDxe.inf
+  INF Platform/Allwinner/A733Pkg/Drivers/UsbHostInitDxe/A733UsbHostInitDxe.inf
+  INF MdeModulePkg/Bus/Sd/SdDxe/SdDxe.inf
+
+  # Disk I/O stack: block device → partition → filesystem
+  INF MdeModulePkg/Universal/Disk/DiskIoDxe/DiskIoDxe.inf
+  INF MdeModulePkg/Universal/Disk/PartitionDxe/PartitionDxe.inf
+  INF FatPkg/EnhancedFatDxe/Fat.inf
+
+  # UEFI Shell
+  INF ShellPkg/Application/Shell/Shell.inf
+
+
+################################################################################
+#
+# Rules
+#
+################################################################################
+
+[Rule.Common.SEC]
+  FILE SEC = $(NAMED_GUID) RELOCS_STRIPPED FIXED {
+    TE  TE Align = Auto                 $(INF_OUTPUT)/$(MODULE_NAME).efi
+  }
+
+[Rule.Common.DXE_CORE]
+  FILE DXE_CORE = $(NAMED_GUID) {
+    PE32     PE32                       $(INF_OUTPUT)/$(MODULE_NAME).efi
+    UI       STRING="$(MODULE_NAME)" Optional
+  }
+
+[Rule.Common.DXE_DRIVER]
+  FILE DRIVER = $(NAMED_GUID) {
+    DXE_DEPEX    DXE_DEPEX              Optional $(INF_OUTPUT)/$(MODULE_NAME).depex
+    PE32         PE32                   $(INF_OUTPUT)/$(MODULE_NAME).efi
+    UI           STRING="$(MODULE_NAME)" Optional
+    RAW          ACPI  Optional               |.acpi
+    RAW          ASL   Optional               |.aml
+  }
+
+[Rule.Common.DXE_RUNTIME_DRIVER]
+  FILE DRIVER = $(NAMED_GUID) {
+    DXE_DEPEX    DXE_DEPEX              Optional $(INF_OUTPUT)/$(MODULE_NAME).depex
+    PE32         PE32                   $(INF_OUTPUT)/$(MODULE_NAME).efi
+    UI           STRING="$(MODULE_NAME)" Optional
+  }
+
+[Rule.Common.UEFI_DRIVER]
+  FILE DRIVER = $(NAMED_GUID) {
+    DXE_DEPEX    DXE_DEPEX              Optional $(INF_OUTPUT)/$(MODULE_NAME).depex
+    PE32         PE32                   $(INF_OUTPUT)/$(MODULE_NAME).efi
+    UI           STRING="$(MODULE_NAME)" Optional
+  }
+
+[Rule.Common.UEFI_APPLICATION]
+  FILE APPLICATION = $(NAMED_GUID) {
+    UI     STRING ="$(MODULE_NAME)"     Optional
+    PE32   PE32                         $(INF_OUTPUT)/$(MODULE_NAME).efi
+  }
+
+[Rule.Common.USER_DEFINED.ACPITABLE]
+  FILE FREEFORM = $(NAMED_GUID) {
+    RAW ACPI  Optional             |.acpi
+    RAW ASL   Optional             |.aml
+  }

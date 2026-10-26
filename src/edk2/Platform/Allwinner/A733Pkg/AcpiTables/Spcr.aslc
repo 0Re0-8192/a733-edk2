@@ -1,0 +1,73 @@
+/** @file
+ * Serial Port Console Redirection Table (SPCR)
+ * Allwinner A733 - UART0 (16550-compatible, MMIO)
+ *
+ * UART0 base address: 0x02500000 (confirmed from DTB)
+ * Clock: 24MHz HOSC / baud rate: 115200
+ * Register stride: 4 bytes (DWORD-aligned)
+ * Interrupt: GIC SPI 2 -> ACPI GSIV 34 (from vendor DT interrupts <0 2 4>)
+ *
+ * Interface type 0x12 (16550_WITH_GAS):
+ *   Uses Generic Address Structure to specify MMIO base + access size.
+ *   RegisterBitWidth=32 and AccessSize=3 (DWORD) match the 4-byte register
+ *   access pattern used by the Windows KD serial path.
+ **/
+
+#include "AcpiTables.h"
+#include <IndustryStandard/SerialPortConsoleRedirectionTable.h>
+
+#define UART0_BASE  0x02500000
+
+EFI_ACPI_SERIAL_PORT_CONSOLE_REDIRECTION_TABLE  Spcr = {
+  {
+    ACPI_HEADER (
+      EFI_ACPI_2_0_SERIAL_PORT_CONSOLE_REDIRECTION_TABLE_SIGNATURE,
+      EFI_ACPI_SERIAL_PORT_CONSOLE_REDIRECTION_TABLE,
+      EFI_ACPI_SERIAL_PORT_CONSOLE_REDIRECTION_TABLE_REVISION
+    )
+  },
+
+  // Interface type: 16550 with Generic Address Structure (MMIO)
+  EFI_ACPI_SERIAL_PORT_CONSOLE_REDIRECTION_TABLE_INTERFACE_TYPE_16550_WITH_GAS,
+
+  { 0, 0, 0 },                // Reserved[3]
+
+  // Base address (GAS): SystemMemory, DWORD registers/access, stride=4
+  {
+    EFI_ACPI_6_3_SYSTEM_MEMORY,   // AddressSpaceId
+    32,                            // RegisterBitWidth
+    0,                             // RegisterBitOffset
+    3,                             // AccessSize: 3 = DWORD (4-byte stride)
+    UART0_BASE                     // Address
+  },
+
+  // Interrupt: GIC SPI 2 -> ACPI GSIV 34. This keeps the SPCR interrupt
+  // description consistent with the vendor DT while COM0 remains hidden from
+  // normal PnP enumeration in DSDT.
+  EFI_ACPI_SERIAL_PORT_CONSOLE_REDIRECTION_TABLE_INTERRUPT_TYPE_GIC,
+  0,                          // Irq (PC IRQ, not used with GIC)
+  34,                         // GlobalSystemInterrupt
+
+  // Serial port settings
+  EFI_ACPI_SERIAL_PORT_CONSOLE_REDIRECTION_TABLE_BAUD_RATE_115200,
+  EFI_ACPI_SERIAL_PORT_CONSOLE_REDIRECTION_TABLE_PARITY_NO_PARITY,
+  EFI_ACPI_SERIAL_PORT_CONSOLE_REDIRECTION_TABLE_STOP_BITS_1,
+  0,                          // FlowControl: none
+
+  // Terminal type: VT100+ (widely supported, works with TeraTerm)
+  EFI_ACPI_SERIAL_PORT_CONSOLE_REDIRECTION_TABLE_TERMINAL_TYPE_VT100_PLUS,
+
+  0,                          // Language (reserved, must be 0)
+
+  // PCI info: not a PCI device
+  0xFFFF,                     // PciDeviceId
+  0xFFFF,                     // PciVendorId
+  0,                          // PciBusNumber
+  0,                          // PciDeviceNumber
+  0,                          // PciFunctionNumber
+  0,                          // PciFlags
+  0,                          // PciSegment
+  0,                          // Reserved (must be 0)
+};
+
+VOID *CONST  ReferenceAcpiTable = &Spcr;

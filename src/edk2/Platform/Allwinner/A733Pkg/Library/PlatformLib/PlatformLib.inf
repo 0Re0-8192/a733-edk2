@@ -1,0 +1,38 @@
+## @file
+# Allwinner A733 ArmPlatformLib
+##
+
+[Defines]
+  INF_VERSION    = 0x00010005
+  BASE_NAME      = A733PlatformLib
+  FILE_GUID      = a733cafe-0001-0001-0001-a733a733a733
+  MODULE_TYPE    = BASE
+  VERSION_STRING = 0.1
+  LIBRARY_CLASS  = ArmPlatformLib
+
+[Sources.common]
+  A733Platform.c
+
+[Sources.AARCH64]
+  AArch64/A733Helper.S
+
+[Packages]
+  ArmPkg/ArmPkg.dec
+  ArmPlatformPkg/ArmPlatformPkg.dec
+  MdePkg/MdePkg.dec
+  Platform/Allwinner/A733Pkg/A733Pkg.dec
+
+[LibraryClasses]
+  ArmLib
+  DebugLib
+  IoLib
+  MemoryAllocationLib
+  PcdLib
+  SerialPortLib
+
+[Ppis]
+  gArmMpCoreInfoPpiGuid
+
+[FixedPcd]
+  gArmTokenSpaceGuid.PcdSystemMemoryBase
+  gArmTokenSpaceGuid.PcdSystemMemorySize

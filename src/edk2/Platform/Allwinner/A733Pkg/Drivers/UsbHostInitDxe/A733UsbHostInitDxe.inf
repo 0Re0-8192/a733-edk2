@@ -1,0 +1,35 @@
+## @file
+# A733 USB1 (EHCI) host init: clock/reset/PHY/VBUS + SSDT publication for Windows usbehci.
+##
+
+[Defines]
+  INF_VERSION = 0x00010005
+  BASE_NAME = A733UsbHostInitDxe
+  FILE_GUID = A7331005-0000-0000-0000-A73310050001
+  MODULE_TYPE = DXE_DRIVER
+  VERSION_STRING = 0.2
+  ENTRY_POINT = A733UsbHostInitDxeInitialize
+
+[Sources]
+  A733UsbHostInitDxe.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+
+[LibraryClasses]
+  IoLib
+  TimerLib
+  PrintLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+  CacheMaintenanceLib
+  MemoryAllocationLib
+  BaseMemoryLib
+  DxeServicesTableLib
+  BaseLib
+
+[Protocols]
+  gEfiAcpiTableProtocolGuid
+
+[Depex]
+  gEfiAcpiTableProtocolGuid

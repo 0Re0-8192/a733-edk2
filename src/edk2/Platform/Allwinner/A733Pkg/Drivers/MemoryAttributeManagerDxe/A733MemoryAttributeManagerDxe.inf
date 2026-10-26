@@ -1,0 +1,41 @@
+## @file
+# Minimal A733 memory attribute protocol manager.
+#
+# This is a reduced adaptation of Raspberry Pi 5's MemoryAttributeManagerDxe.
+# It exists only to A/B whether uninstalling EFI_MEMORY_ATTRIBUTE_PROTOCOL
+# avoids the current Windows boot manager runtime-service restore hang.
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = A733MemoryAttributeManagerDxe
+  FILE_GUID                      = A733B007-0000-0000-0000-A733B0071003
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = A733MemoryAttributeManagerInitialize
+
+[Sources]
+  A733MemoryAttributeManagerDxe.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  Platform/Allwinner/A733Pkg/A733Pkg.dec
+
+[LibraryClasses]
+  DebugLib
+  MemoryAllocationLib
+  PcdLib
+  PrintLib
+  SerialPortLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+
+[Protocols]
+  gEfiMemoryAttributeProtocolGuid
+
+[FixedPcd]
+  gA733TokenSpaceGuid.PcdMemoryAttributeProtocolEnabledDefault
+
+[Depex]
+  TRUE

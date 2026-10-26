@@ -1,0 +1,38 @@
+## @file
+# A733 display pipeline state probe.
+#
+# Diagnostic-only DXE driver. Default-disabled by PCD.
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = A733DisplayProbeDxe
+  FILE_GUID                      = A7331003-0000-0000-0000-A73310030001
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = A733DisplayProbeDxeInitialize
+
+[Sources]
+  A733DisplayProbeDxe.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  Platform/Allwinner/A733Pkg/A733Pkg.dec
+
+[LibraryClasses]
+  DebugLib
+  IoLib
+  PcdLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+
+[Guids]
+  gEfiEventReadyToBootGuid
+
+[FixedPcd]
+  gA733TokenSpaceGuid.PcdDisplayProbeDxeEnable
+  gA733TokenSpaceGuid.PcdDisplayProbeTouchDisplayMmio
+  gA733TokenSpaceGuid.PcdDisplayProbeTemporaryClockTouch
+
+[Depex]
+  TRUE

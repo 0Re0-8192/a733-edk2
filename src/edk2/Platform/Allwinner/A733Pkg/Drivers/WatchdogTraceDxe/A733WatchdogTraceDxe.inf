@@ -1,0 +1,33 @@
+## @file
+# A733 boot-services watchdog trace hook.
+#
+# Diagnostic-only DXE driver. Logs SetWatchdogTimer calls made before
+# ExitBootServices and restores the original Boot Services entry at EBS.
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = A733WatchdogTraceDxe
+  FILE_GUID                      = A733B007-0000-0000-0000-A733B0071006
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = A733WatchdogTraceDxeInitialize
+
+[Sources]
+  A733WatchdogTraceDxe.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+
+[LibraryClasses]
+  DebugLib
+  PrintLib
+  SerialPortLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+
+[Guids]
+  gEfiEventExitBootServicesGuid
+
+[Depex]
+  TRUE

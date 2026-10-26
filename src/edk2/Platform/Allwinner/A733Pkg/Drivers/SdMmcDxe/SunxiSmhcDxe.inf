@@ -1,0 +1,53 @@
+## @file
+# Allwinner A733/A523/H618 SMHC DXE Driver
+# Implements EFI_SD_MMC_PASS_THRU_PROTOCOL for SMHC0 (SD) and SMHC2 (eMMC).
+##
+
+[Defines]
+  INF_VERSION    = 0x00010005
+  BASE_NAME      = SunxiSmhcDxe
+  FILE_GUID      = a733b001-b001-b001-b001-a733a733b001
+  MODULE_TYPE    = DXE_DRIVER
+  VERSION_STRING = 1.0
+  ENTRY_POINT    = SunxiSmhcDxeEntryPoint
+
+[Sources]
+  SunxiSmhcDxe.c
+  SunxiSmhcReg.h
+
+[Packages]
+  EmbeddedPkg/EmbeddedPkg.dec
+  Platform/Allwinner/A733Pkg/A733Pkg.dec
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+
+[LibraryClasses]
+  UefiDriverEntryPoint
+  UefiBootServicesTableLib
+  UefiLib
+  BaseLib
+  BaseMemoryLib
+  DebugLib
+  DmaLib
+  IoLib
+  TimerLib
+  MemoryAllocationLib
+  DevicePathLib
+  SerialPortLib
+  CacheMaintenanceLib
+
+[Protocols]
+  gEfiBlockIoProtocolGuid
+  gEfiSdMmcPassThruProtocolGuid     ## PRODUCES
+  gEfiDevicePathProtocolGuid        ## PRODUCES
+
+[Guids]
+  gEfiEventExitBootServicesGuid
+
+[FixedPcd]
+  gA733TokenSpaceGuid.PcdSmhcTransferClockDiv
+  gA733TokenSpaceGuid.PcdSmhcSplitCmd18Reads
+  gA733TokenSpaceGuid.PcdSmhcUhsLevel
+
+[Depex]
+  TRUE

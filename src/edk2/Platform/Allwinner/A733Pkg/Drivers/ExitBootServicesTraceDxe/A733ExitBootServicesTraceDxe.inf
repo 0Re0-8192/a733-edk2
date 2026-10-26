@@ -1,0 +1,32 @@
+## @file
+# A733 ExitBootServices trace hook.
+#
+# Diagnostic-only DXE driver. Logs the Windows-supplied ExitBootServices
+# ImageHandle/MemoryMapKey and a final memory-map summary, restores the original
+# Boot Services entry, then forwards unchanged.
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = A733ExitBootServicesTraceDxe
+  FILE_GUID                      = A733B007-0000-0000-0000-A733B0071007
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = A733ExitBootServicesTraceDxeInitialize
+
+[Sources]
+  A733ExitBootServicesTraceDxe.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+
+[LibraryClasses]
+  DebugLib
+  MemoryAllocationLib
+  PrintLib
+  SerialPortLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+
+[Depex]
+  TRUE

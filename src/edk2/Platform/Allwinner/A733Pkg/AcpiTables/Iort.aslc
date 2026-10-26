@@ -1,0 +1,68 @@
+/** @file
+ * IO Remapping Table (IORT)
+ * Allwinner A733 - diagnostic named-component IORT
+ *
+ * The measured A733 IOMMU blocks at 0x03900000/0x03910000 match the
+ * Allwinner v20-style register shape, not ARM SMMUv2/SMMUv3 ID registers.
+ * Do not advertise a false SMMU node. This table is a narrow A/B that only
+ * describes the DSDT SD controller as a non-coherent named component, matching
+ * the existing _CCA=0 property, without claiming any remapping topology.
+ **/
+
+#include "AcpiTables.h"
+
+#include <IndustryStandard/IoRemappingTable.h>
+
+#define A733_IORT_SDC0_OBJECT_NAME  "\\_SB.SDC0"
+#define A733_IORT_SDC0_OBJECT_SIZE  10
+#define A733_IORT_SDC0_OBJECT_PAD   2
+
+#pragma pack(1)
+typedef struct {
+  EFI_ACPI_6_0_IO_REMAPPING_NAMED_COMP_NODE  Node;
+  CHAR8                                      ObjectName[A733_IORT_SDC0_OBJECT_SIZE];
+  UINT8                                      Padding[A733_IORT_SDC0_OBJECT_PAD];
+} A733_IORT_NAMED_COMPONENT_NODE;
+
+typedef struct {
+  EFI_ACPI_6_0_IO_REMAPPING_TABLE            Header;
+  A733_IORT_NAMED_COMPONENT_NODE             Sdc0;
+} A733_IORT;
+#pragma pack()
+
+A733_IORT Iort = {
+  {
+    {
+      ACPI_HEADER (
+        EFI_ACPI_6_3_IO_REMAPPING_TABLE_SIGNATURE,
+        A733_IORT,
+        EFI_ACPI_IO_REMAPPING_TABLE_REVISION_00
+      )
+    },
+    1,                           // NumNodes
+    sizeof (EFI_ACPI_6_0_IO_REMAPPING_TABLE),
+    0,                           // Reserved
+  },
+  {
+    {
+      {
+        EFI_ACPI_IORT_TYPE_NAMED_COMP,
+        sizeof (A733_IORT_NAMED_COMPONENT_NODE),
+        2,                         // Revision for IORT revisions before 0x5
+        EFI_ACPI_RESERVED_DWORD,
+        0,                         // NumIdMappings
+        0,                         // IdReference
+      },
+      0,                           // Flags
+      0,                           // CacheCoherent: matches DSDT _CCA=0
+      0,                           // AllocationHints
+      EFI_ACPI_RESERVED_WORD,
+      0,                           // MemoryAccessFlags
+      32,                          // Device memory address size limit
+    },
+    A733_IORT_SDC0_OBJECT_NAME,
+    { 0, 0 },
+  },
+};
+
+VOID* CONST ReferenceAcpiTable = &Iort;
