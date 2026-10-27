@@ -13,8 +13,8 @@ Layout:
 
 Usage:
   python3 make_sd_image.py
-  Then write sd_boot.img to SD card with write_sd.py. The current writer
-  preserves the existing GPT/ESP and writes from boot0 onward.
+  Then write the sunxi-package region to the card with write_firmware_region.py
+  (or write the whole image to a blank card).
 """
 
 import binascii
